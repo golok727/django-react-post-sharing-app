@@ -58,30 +58,50 @@ def getPosts(request):
 
 
 
-@api_view(["GET"])
+@api_view(["GET", "PUT"])
 @permission_classes([IsAuthenticated])
 def getPost(request, id):
-    try:
+
+    if request.method == "GET" :
+        try:
+        
+            post = Post.objects.get(id=id)
+            serializer = PostSerializer(post, many=False)
+
+            return Response(serializer.data)
+
+        except Post.DoesNotExist:
+            return Response({"data": "The Post does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "PUT":
+        print("HELLO")
+        try:
+            post = Post.objects.get(id=id)
+           
+
+        except Post.DoesNotExist:
+            return Response({"error": "The Post does not exits"}, status=status.HTTP_404_NOT_FOUND)
+
+        if post.user != request.user:
+               return Response({"error": "You do not have the permission to edit this post"}, status=status.HTTP_403_FORBIDDEN)
+
        
-        post = Post.objects.get(id=id)
-        serializer = PostSerializer(post, many=False)
-
-        return Response(serializer.data)
-
-    except Post.DoesNotExist as err:
-        return Response({"data": "The Post does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = PostSerializer(instance=post, data=request.data, partial=True)
+        if serializer.is_valid():
+                serializer.save()
+                return Response({"code": "Post updated", "data": serializer.data})
+        
+        return Response({"error": "Something Went Wrong"}) 
    
 
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def createPost(request):
-    
     try:
         title = request.data["title"]
         description = request.data["description"]
 
-# TODO add the post current user !!!!!!!!!! VERY IMPORTANT
         new_post = Post.objects.create(title=title, description=description, user=request.user)
         serializer = PostSerializer(new_post)
 
@@ -89,7 +109,6 @@ def createPost(request):
 
     except KeyError as err:
         return Response({"title": ["This Field is required"], "description": ["This Field is required"]}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 @api_view(["POST"])

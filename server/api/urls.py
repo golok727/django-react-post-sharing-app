@@ -14,6 +14,7 @@ urlpatterns = [
 
     path("posts/create/", views.createPost, name="create_post"),
 
+
     path("signup/", views.signup, name="signup"),
 
 
