@@ -1,28 +1,57 @@
-import React, { createContext, useEffect, useState } from "react";
-import { AuthContextType, Token, User } from "./AuthContextTypes";
+import React, { createContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import jwtDecode from "jwt-decode";
+export interface Tokens {
+	access: string;
+	refresh: string;
+}
+export interface User {
+	user_id: number;
+	username: string;
+}
 
-const initialAuthState = {
-	isLoading: false,
-	isAuthenticated: false,
-};
+interface AuthState {
+	user: User | null;
+	tokens: Tokens | null;
+	authError: string;
+	loading: boolean;
+	loginUser: (username: string, password: string, cb: () => void) => void;
+	logoutUser: () => void;
+}
 
-export const AuthContext = createContext<AuthContextType>(null!);
+export const AuthContext = createContext<AuthState>(null!);
 
 type Props = {
 	children: React.ReactNode;
 };
 
 export const AuthProvider: React.FC<Props> = ({ children }) => {
-	const [isLoading, setIsLoading] = useState(initialAuthState.isLoading);
-	const [isAuthenticated, setIsAuthenticated] = useState(
-		initialAuthState.isAuthenticated
-	);
-	const [token, setToken] = useState<Token>(null!);
-	const [user, setUser] = useState<User>(null!);
-	const [error, setError] = useState("");
+	const navigate = useNavigate();
 
-	const login = async (username: string, password: string) => {
+	const [authError, setAuthError] = useState("");
+	const [tokens, setAuthTokens] = useState<Tokens | null>(() =>
+		localStorage.getItem("tokens")
+			? JSON.parse(localStorage.getItem("tokens") as string)
+			: null
+	);
+	const [user, setUser] = useState<User | null>(() =>
+		localStorage.getItem("tokens")
+			? jwtDecode(
+					(JSON.parse(localStorage.getItem("tokens") as string) as Tokens)
+						.access
+			  )
+			: null
+	);
+	const [loading, setLoading] = useState(false);
+
+	// Login
+	const loginUser = async (
+		username: string,
+		password: string,
+		cb: () => void
+	) => {
 		try {
+			setLoading(() => true);
 			const res = await fetch("/api/token/", {
 				method: "POST",
 				headers: {
@@ -30,49 +59,65 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 				},
 				body: JSON.stringify({ username, password }),
 			});
-			console.log(res.status);
+
 			const data = await res.json();
-			console.log(data);
-			if (res.status === 401) {
-				setError(data?.detail);
-				setTimeout(() => setError(""), 3000);
-			}
 
 			if (res.status === 200) {
-				setToken(data);
-				localStorage.setItem("token", JSON.stringify(data));
-				setIsAuthenticated(true);
+				setAuthTokens(() => data);
+				setUser(jwtDecode(data.access));
+				localStorage.setItem("tokens", JSON.stringify(data));
+				cb();
+				setLoading(() => false);
+				return;
+			}
+
+			if (res.status === 401) {
+				if (data && data.detail) {
+					setAuthError(() => data.detail);
+				} else {
+					setAuthError(
+						() =>
+							"Something Went Wrong.. Please Try again with correct credentials"
+					);
+
+					setLoading(() => false);
+				}
+
+				setTimeout(() => {
+					setAuthError("");
+				}, 5000);
+
+				setLoading(() => false);
+
+				// TODO logout
 			}
 		} catch (error) {
-			setError("Something Went Wrong. Please Try Again");
-			setTimeout(() => setTimeout(""), 3000);
+			setAuthError("Server Error.... Please Try again later");
+			setTimeout(() => {
+				setAuthError("");
+				setLoading(false);
+			}, 3000);
 		}
 	};
 
-	useEffect(() => {
-		if (localStorage.getItem("token")) {
-			setToken(() => JSON.parse(localStorage.getItem("token") as string));
-			setIsAuthenticated(true);
-			console.log(token, isAuthenticated);
-		} else {
-			setIsAuthenticated(false);
-		}
-	}, []);
+	// logout
+	const logoutUser = () => {
+		setAuthTokens(null);
+		setUser(null);
+		localStorage.removeItem("tokens");
+		navigate("/login");
+	};
+
+	const contextValue: AuthState = {
+		user,
+		tokens,
+		authError,
+		loading,
+		loginUser,
+		logoutUser,
+	};
 
 	return (
-		<AuthContext.Provider
-			value={{
-				isLoading,
-				isAuthenticated,
-				setIsAuthenticated,
-				setToken,
-				token,
-				user,
-				login,
-				error,
-			}}
-		>
-			{children}
-		</AuthContext.Provider>
+		<AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
 	);
 };
