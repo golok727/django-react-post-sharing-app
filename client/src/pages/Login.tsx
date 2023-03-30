@@ -1,19 +1,55 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useContext, useEffect, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
+// TODO JWT DECODE
+
 const Login: React.FC = () => {
+	const { login, isAuthenticated, error } = useContext(AuthContext);
+
+	const [username, setUsername] = useState("");
+	const [password, setPassword] = useState("");
+	const navigate = useNavigate();
+	// console.log({ username, password });
+	useEffect(() => {
+		if (error) alert(error);
+	}, [error]);
+
+	const handleLoginSubmit = (e: React.FormEvent) => {
+		e.preventDefault();
+
+		if (username === "" || password === "") {
+			// TODO Handle Error
+			alert("username or password cannot be empty");
+			return;
+		}
+
+		login(username, password);
+
+		if (isAuthenticated) {
+			navigate("/");
+		}
+
+		setUsername("");
+		setPassword("");
+	};
+
 	return (
 		<div className="flex items-center justify-center h-screen flex-col ">
 			<h1 className="font-extrabold text-xl mb-10">Welcome Back :&#41;</h1>
-			<form className="flex flex-col items-center">
+			<form onSubmit={handleLoginSubmit} className="flex flex-col items-center">
 				<div className="md:px-0 md:w-[400px] w-screen px-5 mb-6">
 					<label className="block text-sm my-3 font-bold" htmlFor="">
 						Username
 					</label>
 					<input
+						value={username}
+						onChange={(e: React.FormEvent<HTMLInputElement>) =>
+							setUsername(e.currentTarget.value)
+						}
 						placeholder="@username"
 						type="text"
+						name="username"
 						className="rounded  px-3 py-2 w-full bg-transparent border-gray-500 border-2"
 					/>
 				</div>
@@ -23,8 +59,14 @@ const Login: React.FC = () => {
 						Password
 					</label>
 					<input
+						value={password}
 						placeholder="Password"
+						onChange={(e: React.FormEvent<HTMLInputElement>) =>
+							setPassword(e.currentTarget.value)
+						}
+						autoComplete="on"
 						type="password"
+						name="password"
 						className="rounded  px-3 py-2 w-full bg-transparent border-gray-500 border-2"
 					/>
 				</div>
