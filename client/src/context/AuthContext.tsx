@@ -10,8 +10,14 @@ export interface Tokens {
 	refresh: string;
 }
 export interface User {
-	user_id: number;
+	id: number;
 	username: string;
+	last_login: string | null;
+	first_name: string;
+	last_name: string;
+	email: string;
+	date_joined: string;
+	is_superuser: boolean;
 }
 
 interface AuthState {

@@ -1,0 +1,9 @@
+GET  /api/posts/ HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjgwMjQ4Njc1LCJpYXQiOjE2ODAyNDgzNzUsImp0aSI6ImU4NzZlZDY1MzY4NDQ2OTdhODcwNDFjYmVhMWE0ZWE0IiwidXNlcl9pZCI6MSwidXNlcm5hbWUiOiJuYXJhIn0.BNGLDHM0SY5Q2BBUo-vbHo4PAvmHGix6xlqnbbV9cGY
+Host: 127.0.0.1:8000
+
+Content-Type: application/json
+{
+  "title": "test updated"
+}
+
