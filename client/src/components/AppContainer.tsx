@@ -6,7 +6,7 @@ const AppContainer: React.FC = () => {
 	const { loading, authError } = useContext(AuthContext);
 
 	return (
-		<div className="min-h-screen bg-slate-900 text-white relative">
+		<div className="min-h-screen bg-slate-900 text-white relative ">
 			{/* <h1 className="text-orange-700 font-bold">Radhey Shyam</h1> */}
 			<Outlet />
 			{loading && (

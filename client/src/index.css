@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind utilities;
 @tailwind components;
+
+@layer base {
+	body {
+		@apply bg-slate-900 mb-10 min-h-screen;
+	}
+}

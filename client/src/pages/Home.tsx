@@ -3,7 +3,7 @@ import Navbar from "../components/Navbar";
 import Posts from "../components/Posts";
 const Home: React.FC = () => {
 	return (
-		<div>
+		<div className="">
 			<Navbar />
 
 			<Posts />
