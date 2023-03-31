@@ -3,7 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 const Navbar = () => {
 	const { user, logoutUser } = useContext(AuthContext);
 	return (
-		<div className="w-full border-b-[1px] border-gray-600 px-3 py-3">
+		<div className="w-full border-b-[1px] border-gray-600 bg-slate-900 px-3 py-3 fixed top-0 z-100">
 			<div className="container max-w-2xl mx-auto flex justify-between items-center">
 				<h1 className="font-bold">
 					Welcome{" "}
