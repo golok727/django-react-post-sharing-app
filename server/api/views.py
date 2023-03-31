@@ -147,7 +147,7 @@ def signup(request):
         
         serializer = UserSerializer(new_user)
 
-        return Response({"status": "user Created", "user": serializer.data})
+        return Response({"status": "user Created", "user": serializer.data}, status=status.HTTP_201_CREATED)
 
     except KeyError as _:
         return Response({"data": "Data provided for signup is incomplete"}, status=status.HTTP_400_BAD_REQUEST)

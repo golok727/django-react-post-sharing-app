@@ -65,7 +65,7 @@ const Login: React.FC = () => {
 					</label>
 					<input
 						value={username}
-						onChange={(e: React.FormEvent<HTMLInputElement>) =>
+						onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
 							setUsername(e.currentTarget.value)
 						}
 						placeholder="@username"
@@ -82,7 +82,7 @@ const Login: React.FC = () => {
 					<input
 						value={password}
 						placeholder="Password"
-						onChange={(e: React.FormEvent<HTMLInputElement>) =>
+						onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
 							setPassword(e.currentTarget.value)
 						}
 						autoComplete="new-password"

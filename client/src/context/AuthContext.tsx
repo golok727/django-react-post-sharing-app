@@ -1,5 +1,9 @@
 import React, { createContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {
+	GetScrollRestorationKeyFunction,
+	createBrowserRouter,
+	useNavigate,
+} from "react-router-dom";
 import jwtDecode from "jwt-decode";
 export interface Tokens {
 	access: string;
@@ -17,6 +21,12 @@ interface AuthState {
 	loading: boolean;
 	loginUser: (username: string, password: string, cb: () => void) => void;
 	logoutUser: () => void;
+	signUpUser: (
+		username: string,
+		password: string,
+		email: string,
+		cb: () => void
+	) => void;
 }
 
 export const AuthContext = createContext<AuthState>(null!);
@@ -108,6 +118,44 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 		navigate("/login");
 	};
 
+	// radha@krsna123
+	const signUpUser = async (
+		username: string,
+		email: string,
+		password: string,
+		cb: () => void
+	) => {
+		setLoading(true);
+		try {
+			const res = await fetch("/api/signup/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ username, email, password }),
+			});
+
+			const data = await res.json();
+
+			if (res.status === 409) {
+				setLoading(false);
+				setAuthError(() => data.data);
+
+				setTimeout(() => setAuthError(""), 4000);
+				return;
+			}
+			if (res.status === 200 || res.status === 201) {
+				setLoading(false);
+				cb();
+			}
+		} catch (error) {
+			setLoading(() => false);
+			setAuthError("Something went wrong...");
+			setTimeout(() => setAuthError(""), 4000);
+			return;
+		}
+	};
+
 	const contextValue: AuthState = {
 		user,
 		tokens,
@@ -115,6 +163,7 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 		loading,
 		loginUser,
 		logoutUser,
+		signUpUser,
 	};
 
 	return (
