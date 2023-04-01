@@ -7,12 +7,15 @@ import ProtectedRoute from "./utils/ProtectedRoute";
 
 import { AuthProvider } from "./context/AuthContext";
 import Home from "./pages/Home";
+import { PostsProvider } from "./context/PostsContext";
 const router = createBrowserRouter([
 	{
 		path: "/",
 		element: (
 			<AuthProvider>
-				<Main />
+				<PostsProvider>
+					<Main />
+				</PostsProvider>
 			</AuthProvider>
 		),
 		children: [
