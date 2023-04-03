@@ -1,4 +1,4 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useCallback, useEffect, useState } from "react";
 import {
 	GetScrollRestorationKeyFunction,
 	createBrowserRouter,
@@ -43,7 +43,7 @@ type Props = {
 
 export const AuthProvider: React.FC<Props> = ({ children }) => {
 	const navigate = useNavigate();
-
+	const [refreshed, setRefreshed] = useState(false);
 	const [authError, setAuthError] = useState("");
 	const [tokens, setAuthTokens] = useState<Tokens | null>(() =>
 		localStorage.getItem("tokens")
@@ -58,7 +58,7 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 			  )
 			: null
 	);
-	const [loading, setLoading] = useState(false);
+	const [loading, setLoading] = useState(true);
 
 	// Login
 	const loginUser = async (
@@ -161,6 +161,51 @@ export const AuthProvider: React.FC<Props> = ({ children }) => {
 			return;
 		}
 	};
+
+	const updateToken = useCallback(async () => {
+		if (!refreshed) {
+			const res = await fetch("/api/token/refresh/", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ refresh: tokens?.refresh }),
+			});
+
+			const data = await res.json();
+
+			if (res.status === 200) {
+				setAuthTokens(data);
+				setUser(jwtDecode(data.access));
+				localStorage.setItem("tokens", JSON.stringify(data));
+				setRefreshed(true);
+				console.log("refreshed");
+			} else {
+				setRefreshed(false);
+				logoutUser();
+			}
+
+			if (loading) {
+				setLoading(false);
+			}
+		}
+	}, []);
+
+	useEffect(() => {
+		if (loading && !refreshed) {
+			updateToken();
+		}
+
+		const fiveMin = 1000 * 60 * 4;
+
+		const interval = setInterval(() => {
+			setRefreshed(() => false);
+			if (tokens && !refreshed) {
+				updateToken();
+			}
+		}, fiveMin);
+		return () => clearInterval(interval);
+	}, [tokens, loading]);
 
 	const contextValue: AuthState = {
 		user,

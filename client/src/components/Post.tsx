@@ -20,7 +20,7 @@ interface Props {
 const Post: React.FC<Props> = ({ post }) => {
 	const { user } = useContext(AuthContext);
 	const [liked, setLiked] = useState(
-		user ? post.likes_fld.find((i) => i === user.id) : false
+		user ? post?.likes_fld.find((i) => i === user.id) : false
 	);
 	const [likes, setLikes] = useState(post.likes_fld.length);
 

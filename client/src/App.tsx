@@ -2,7 +2,7 @@ import React, { Children } from "react";
 import Main from "./components/AppContainer";
 import Login from "./pages/Login";
 import SignUp from "./pages/Signup";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Link, RouterProvider } from "react-router-dom";
 import ProtectedRoute from "./utils/ProtectedRoute";
 
 import { AuthProvider } from "./context/AuthContext";
@@ -28,8 +28,12 @@ const router = createBrowserRouter([
 						element: <Home />,
 					},
 					{
-						path: "",
-						element: <div>Dashboard</div>,
+						path: "/dashboard",
+						element: (
+							<div>
+								Dashboard <Link to="/">Home</Link>
+							</div>
+						),
 					},
 				],
 			},
